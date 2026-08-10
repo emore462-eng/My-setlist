@@ -220,7 +220,7 @@ const renderApp = () => {
   state.playlists = getPlaylists();
 
   // Actualizar la lista lateral de playlists
-  renderPlaylistsList(state.playlists, handleOpenPlaylist, handleDeletePlaylist);
+  renderPlaylistsList(state.playlists, handleOpenPlaylist, handleDeletePlaylist, state.playlistActivaId);
 
   // Alternar entre Vista Búsqueda y Vista Detalle de Playlist (HU5)
   if (state.playlistActivaId) {

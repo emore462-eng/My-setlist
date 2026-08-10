@@ -196,3 +196,23 @@ Agregué la Historia 13 a `HISTORIAS.md` con sus 4 criterios de aceptación. Par
 - `app.js`: modifiqué `handleRemoveSong` y `handleDeletePlaylist` (de HU6) para usar `showUndoToast()` en vez de `showToast()` simple, con un callback que restaura vía `insertarCancionEnPlaylist()` o `restaurarPlaylist()`. Saqué del modal de confirmación la frase "Esta acción no se puede deshacer", porque dejó de ser cierta.
 - `CSS/styles.css`: estilos `.toast-undo` y `.btn-undo` para diferenciar este aviso de los toasts normales.
 Probé con Node que la canción vuelve exactamente a su posición original al deshacer, y que un segundo aviso de "deshacer" reemplaza y cancela el anterior (no se pueden acumular deshacer de varias eliminaciones).
+
+## [09-08-2026] — Rediseño visual: interfaz estilo Deezer
+
+**Para qué:** darle una identidad visual propia a la app, inspirada en Deezer, en vez del look genérico con el que se armó durante el desarrollo funcional.
+
+**Prompt:**
+haz que tenga una interfas inspirada en DEEZER por favor
+
+[La IA investigó los colores reales de marca de Deezer antes de diseñar, propuso un
+plan de paleta/tipografía/layout, y armó una primera versión, luego seleccioné con lo que me queria quedar]
+
+
+
+**Resultado:**
+Toqué 4 archivos: `index.html`, `CSS/styles.css`, `js/ui.js` y `js/app.js`.
+- `index.html`: agregué el link a Google Fonts (Poppins + Inter) y reestructuré el layout — la sidebar de playlists pasó de estar a la derecha a una barra fija a la izquierda con el logo, igual que en Deezer/Spotify.
+- `CSS/styles.css`: reescritura completa de la paleta y los componentes. Fondo negro con base violeta y degradé morado→magenta (`#a238ff` → `#ff0092`, verificados como colores reales de marca de Deezer antes de usarlos) para botones primarios, favoritos activos y la playlist abierta. Tipografía Poppins (títulos/logo) + Inter (texto y listas). Mantuve todas las clases que ya usaba `ui.js` para no romper nada, solo agregué las nuevas del shell/sidebar/hero.
+- `ui.js`: 3 ajustes chicos que la IA marcó como decisión propia (no pedidos explícitamente): miniatura con degradé para cada playlist en la sidebar, resaltado de la playlist actualmente abierta (borde rosa a la izquierda), y cambio del ícono de favorito de ⭐/☆ a ♥/♡ para que se sienta más "Deezer" (el criterio de HU12 solo daba la estrella como ejemplo, no como obligación).
+- `app.js`: una línea para pasarle `state.playlistActivaId` a `renderPlaylistsList` y que el resaltado de playlist activa funcione.
+Verifiqué que no quedaran referencias colgantes a clases CSS eliminadas (`app-header`, `playlists-column`, `playlist-card-arrow`) y que todas las clases nuevas usadas en `ui.js` estuvieran definidas en el CSS.

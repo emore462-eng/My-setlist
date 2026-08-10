@@ -174,7 +174,7 @@ export const renderSearchResults = (songs, onAddClick, isLoading, errorMsg) => {
 };
 
 // Renderizado de la lista lateral de Playlists (HU3, HU6)
-export const renderPlaylistsList = (playlists, onOpenClick, onDeleteClick) => {
+export const renderPlaylistsList = (playlists, onOpenClick, onDeleteClick, activePlaylistId) => {
   const container = document.getElementById('playlists-list');
   container.innerHTML = '';
 
@@ -185,15 +185,17 @@ export const renderPlaylistsList = (playlists, onOpenClick, onDeleteClick) => {
 
   playlists.forEach((playlist) => {
     const item = document.createElement('div');
-    item.className = 'playlist-card';
+    item.className = `playlist-card${playlist.id === activePlaylistId ? ' is-active' : ''}`;
     item.innerHTML = `
       <div class="playlist-card-content">
-        <h4 class="playlist-card-title">${playlist.nombre}</h4>
-        <span class="playlist-card-count">${playlist.canciones.length} canción(es)</span>
+        <span class="playlist-card-thumb">🎵</span>
+        <div>
+          <h4 class="playlist-card-title">${playlist.nombre}</h4>
+          <span class="playlist-card-count">${playlist.canciones.length} canción(es)</span>
+        </div>
       </div>
       <div class="playlist-card-actions">
         <button class="btn-icon btn-delete-playlist" title="Eliminar playlist" aria-label="Eliminar playlist">🗑️</button>
-        <span class="playlist-card-arrow">➔</span>
       </div>
     `;
 
@@ -378,7 +380,7 @@ export const renderPlaylistDetail = (
     </div>
     <label class="filter-favoritos">
       <input type="checkbox" id="filtro-favoritos" ${filtroFavoritosActivo ? 'checked' : ''} />
-      Solo favoritas ⭐
+      Solo favoritas ♥
     </label>
   `;
   container.appendChild(toolbar);
@@ -401,9 +403,9 @@ export const renderPlaylistDetail = (
     const emptyFilter = document.createElement('div');
     emptyFilter.className = 'empty-state empty-state-inline';
     emptyFilter.innerHTML = `
-      <div class="empty-icon">⭐</div>
+      <div class="empty-icon">♥</div>
       <h3>Todavía no marcaste favoritas</h3>
-      <p>Tocá la estrella de una canción para verla acá.</p>
+      <p>Tocá el corazón de una canción para verla acá.</p>
     `;
     container.appendChild(emptyFilter);
     return;
@@ -419,7 +421,7 @@ export const renderPlaylistDetail = (
         <span class="song-detail-artist">${cancion.artista} — <em>${cancion.album}</em></span>
       </div>
       <span class="song-detail-date">Agregada: ${formatDate(cancion.fechaAgregado)}</span>
-      <button class="btn-icon btn-favorito ${cancion.favorito ? 'is-favorito' : ''}" title="${cancion.favorito ? 'Quitar de favoritas' : 'Marcar como favorita'}" aria-label="Marcar como favorita">${cancion.favorito ? '⭐' : '☆'}</button>
+      <button class="btn-icon btn-favorito ${cancion.favorito ? 'is-favorito' : ''}" title="${cancion.favorito ? 'Quitar de favoritas' : 'Marcar como favorita'}" aria-label="Marcar como favorita">${cancion.favorito ? '♥' : '♡'}</button>
       <button class="btn-icon btn-remove-song" title="Quitar canción" aria-label="Quitar canción">🗑️</button>
     `;
 

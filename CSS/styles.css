@@ -1,15 +1,22 @@
 :root {
-  --primary-color: #1db954;
-  --primary-hover: #1ed760;
-  --bg-color: #121212;
-  --card-bg: #181818;
-  --card-hover: #282828;
+  /* Paleta inspirada en la identidad real de Deezer: negro con base violeta + degradé morado→magenta */
+  --bg-color: #0b0a10;
+  --bg-sidebar: #14111c;
+  --card-bg: #1c1826;
+  --card-hover: #272033;
+  --accent-purple: #a238ff;
+  --accent-pink: #ff0092;
+  --accent-gradient: linear-gradient(135deg, #a238ff 0%, #ff0092 100%);
+  --primary-color: #a238ff;
+  --primary-hover: #b660ff;
   --text-main: #ffffff;
-  --text-muted: #b3b3b3;
-  --border-color: #333333;
-  --error-color: #e53935;
-  --warning-color: #f57c00;
-  --font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --text-muted: #a79db8;
+  --border-color: #2c2438;
+  --error-color: #ff4d6d;
+  --warning-color: #f5a623;
+  --success-color: #21c17c;
+  --font-display: 'Poppins', system-ui, sans-serif;
+  --font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 * {
@@ -23,53 +30,105 @@ body {
   color: var(--text-main);
   font-family: var(--font-family);
   line-height: 1.5;
-  padding-bottom: 40px;
 }
 
-.app-header {
-  background-color: #000000;
-  padding: 20px;
-  border-bottom: 1px solid var(--border-color);
+/* Estructura general: sidebar fija + panel principal (estilo Deezer/Spotify) */
+.app-shell {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  min-height: 100vh;
 }
 
-.header-container {
-  max-width: 1200px;
-  margin: 0 auto;
+.sidebar {
+  background-color: var(--bg-sidebar);
+  border-right: 1px solid var(--border-color);
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-mark {
+  font-size: 1.4rem;
+  filter: drop-shadow(0 0 6px rgba(162, 56, 255, 0.6));
+}
+
+.brand-name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.sidebar-section {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.sidebar-label {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
 }
 
 .main-container {
-  max-width: 1200px;
-  margin: 20px auto;
-  padding: 0 20px;
+  padding: 32px 40px 60px;
+  max-width: 960px;
 }
 
 /* Botones */
 .btn {
-  padding: 10px 18px;
-  border-radius: 20px;
+  padding: 10px 20px;
+  border-radius: 999px;
   border: none;
   font-weight: 600;
+  font-family: var(--font-family);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.15s ease, filter 0.15s ease, background 0.2s;
 }
 
 .btn-primary {
-  background-color: var(--primary-color);
-  color: #000000;
+  background: var(--accent-gradient);
+  color: #ffffff;
 }
 
 .btn-primary:hover {
-  background-color: var(--primary-hover);
-  transform: scale(1.02);
+  filter: brightness(1.1);
+  transform: translateY(-1px);
 }
 
 .btn-secondary {
-  background-color: #333333;
+  background-color: #2a2438;
   color: #ffffff;
 }
 
 .btn-secondary:hover {
-  background-color: #444444;
+  background-color: #362d49;
+}
+
+.btn-pill {
+  background: transparent;
+  color: var(--accent-purple);
+  border: 1px solid var(--accent-purple);
+}
+
+.btn-pill:hover {
+  background: var(--accent-purple);
+  color: #ffffff;
 }
 
 .btn-danger {
@@ -78,7 +137,7 @@ body {
 }
 
 .btn-danger:hover {
-  background-color: #ff5b52;
+  background-color: #ff6b85;
 }
 
 .btn-icon {
@@ -89,16 +148,35 @@ body {
   padding: 4px 6px;
   border-radius: 6px;
   line-height: 1;
-  transition: background 0.2s;
+  transition: background 0.2s, transform 0.15s;
 }
 
 .btn-icon:hover {
-  background-color: rgba(229, 57, 53, 0.15);
+  background-color: rgba(255, 0, 146, 0.15);
+  transform: scale(1.08);
 }
 
-/* Buscador */
+/* Buscador (hero de la vista principal) */
+.search-hero {
+  background: radial-gradient(120% 180% at 0% 0%, rgba(162, 56, 255, 0.28), transparent 60%),
+              radial-gradient(120% 180% at 100% 0%, rgba(255, 0, 146, 0.18), transparent 55%);
+  border-radius: 20px;
+  padding: 36px 32px;
+  margin-bottom: 32px;
+}
+
+.hero-eyebrow {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--accent-pink);
+  margin-bottom: 10px;
+}
+
 .search-box {
-  margin-bottom: 30px;
+  margin: 0;
 }
 
 #search-form {
@@ -109,33 +187,31 @@ body {
 
 #search-input {
   flex: 1;
-  padding: 12px 18px;
-  border-radius: 20px;
+  padding: 14px 20px;
+  border-radius: 999px;
   border: 1px solid var(--border-color);
-  background-color: var(--card-bg);
+  background-color: rgba(28, 24, 38, 0.9);
   color: var(--text-main);
+  font-family: var(--font-family);
   font-size: 1rem;
 }
 
 #search-input:focus {
-  outline: 2px solid var(--primary-color);
+  outline: 2px solid var(--accent-purple);
 }
 
-/* Grid layout */
+/* Layout de contenido */
 .content-layout {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 30px;
-}
-
-@media (max-width: 768px) {
-  .content-layout {
-    grid-template-columns: 1fr;
-  }
+  display: block;
 }
 
 .section-title {
-  font-size: 1.3rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
   margin-bottom: 16px;
 }
 
@@ -147,7 +223,7 @@ body {
 .results-grid {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .song-card {
@@ -155,8 +231,8 @@ body {
   align-items: center;
   gap: 16px;
   background-color: var(--card-bg);
-  padding: 12px 16px;
-  border-radius: 8px;
+  padding: 10px 16px;
+  border-radius: 10px;
   transition: background 0.2s;
 }
 
@@ -165,19 +241,23 @@ body {
 }
 
 .song-card-img {
-  width: 56px;
-  height: 56px;
-  border-radius: 6px;
+  width: 52px;
+  height: 52px;
+  border-radius: 8px;
   object-fit: cover;
 }
 
 .song-card-info {
   flex: 1;
+  min-width: 0;
 }
 
 .song-title {
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 0.98rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .song-meta {
@@ -189,24 +269,29 @@ body {
 }
 
 .song-duration {
-  background-color: #2a2a2a;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  color: #cccccc;
+  background-color: rgba(162, 56, 255, 0.15);
+  color: var(--accent-purple);
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.btn-add {
+  border-radius: 999px;
 }
 
 /* Avisos de estado (HU2) */
 .status-box {
-  padding: 20px;
-  border-radius: 8px;
+  padding: 24px;
+  border-radius: 12px;
   background-color: var(--card-bg);
   text-align: center;
   margin-top: 10px;
 }
 
 .status-box.loading {
-  color: var(--primary-color);
+  color: var(--accent-purple);
 }
 
 .status-box.empty {
@@ -218,41 +303,73 @@ body {
   border: 1px solid var(--error-color);
 }
 
-/* Columna Lateral de Playlists (HU3) */
+/* Lista de Playlists en la sidebar (HU3, HU6) */
 .sidebar-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
+  gap: 10px;
 }
 
 .playlists-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
+  overflow-y: auto;
 }
 
 .playlist-card {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: var(--card-bg);
-  padding: 14px 18px;
-  border-radius: 8px;
+  gap: 10px;
+  background-color: transparent;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border-left: 3px solid transparent;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.2s, border-color 0.2s;
 }
 
 .playlist-card:hover {
   background-color: var(--card-hover);
 }
 
+.playlist-card.is-active {
+  background-color: var(--card-hover);
+  border-left-color: var(--accent-pink);
+}
+
+.playlist-card-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.playlist-card-thumb {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border-radius: 8px;
+  background: var(--accent-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+}
+
 .playlist-card-title {
   font-weight: 600;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .playlist-card-count {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
   display: block;
 }
@@ -260,7 +377,7 @@ body {
 .playlist-card-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
 }
 
 /* Detalle de Playlist (HU5) */
@@ -272,7 +389,10 @@ body {
 }
 
 .playlist-detail-info h2 {
-  font-size: 2rem;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 2.1rem;
+  letter-spacing: -0.02em;
   margin-top: 8px;
 }
 
@@ -290,11 +410,12 @@ body {
 
 .stat-item {
   background-color: var(--card-bg);
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 14px 16px;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  border-top: 2px solid var(--accent-purple);
 }
 
 .stat-label {
@@ -305,6 +426,7 @@ body {
 .stat-value {
   font-size: 1.1rem;
   font-weight: 600;
+  font-family: var(--font-display);
 }
 
 /* Barra de herramientas de la Playlist: orden (HU9) + filtro de favoritas (HU12) */
@@ -330,8 +452,8 @@ body {
 
 .sort-select {
   padding: 8px 12px;
-  border-radius: 8px;
-  background-color: #222222;
+  border-radius: 999px;
+  background-color: var(--card-bg);
   color: #ffffff;
   border: 1px solid var(--border-color);
   font-size: 0.9rem;
@@ -348,19 +470,19 @@ body {
 }
 
 .filter-favoritos input {
-  accent-color: var(--primary-color);
+  accent-color: var(--accent-pink);
   width: 16px;
   height: 16px;
   cursor: pointer;
 }
 
 .btn-favorito {
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   color: var(--text-muted);
 }
 
 .btn-favorito.is-favorito {
-  color: #ffd54f;
+  color: var(--accent-pink);
 }
 
 .empty-state-inline {
@@ -371,7 +493,7 @@ body {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .song-detail-item {
@@ -379,34 +501,48 @@ body {
   align-items: center;
   gap: 16px;
   background-color: var(--card-bg);
-  padding: 12px 16px;
-  border-radius: 8px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  transition: background 0.2s;
+}
+
+.song-detail-item:hover {
+  background-color: var(--card-hover);
 }
 
 .song-detail-cover {
-  width: 48px;
-  height: 48px;
-  border-radius: 4px;
+  width: 46px;
+  height: 46px;
+  border-radius: 6px;
+  object-fit: cover;
 }
 
 .song-detail-info {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
 }
 
 .song-detail-title {
   font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .song-detail-artist {
   font-size: 0.85rem;
   color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .song-detail-date {
   font-size: 0.8rem;
   color: var(--text-muted);
+  white-space: nowrap;
 }
 
 .btn-remove-song {
@@ -418,7 +554,7 @@ body {
   text-align: center;
   padding: 60px 20px;
   background-color: var(--card-bg);
-  border-radius: 12px;
+  border-radius: 16px;
   margin-top: 20px;
 }
 
@@ -440,20 +576,20 @@ body {
 
 .toast {
   padding: 12px 20px;
-  border-radius: 8px;
+  border-radius: 12px;
   color: #ffffff;
   font-weight: 500;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
   animation: slideIn 0.3s ease-out;
 }
 
-.toast-success { background-color: #2e7d32; }
-.toast-warning { background-color: #ed6c02; }
-.toast-error { background-color: #d32f2f; }
-.toast-info { background-color: #0288d1; }
+.toast-success { background-color: var(--success-color); }
+.toast-warning { background-color: var(--warning-color); }
+.toast-error { background-color: var(--error-color); }
+.toast-info { background: var(--accent-gradient); }
 
 .toast-undo {
-  background-color: #2b2b2b;
+  background-color: var(--card-bg);
   border: 1px solid var(--border-color);
   display: flex;
   align-items: center;
@@ -462,10 +598,10 @@ body {
 
 .btn-undo {
   background: transparent;
-  border: 1px solid var(--primary-color);
-  color: var(--primary-color);
-  border-radius: 6px;
-  padding: 6px 12px;
+  border: 1px solid var(--accent-purple);
+  color: var(--accent-purple);
+  border-radius: 999px;
+  padding: 6px 14px;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
@@ -473,7 +609,8 @@ body {
 }
 
 .btn-undo:hover {
-  background: var(--primary-color);
+  background: var(--accent-gradient);
+  border-color: transparent;
   color: #ffffff;
 }
 
@@ -485,7 +622,7 @@ body {
 .modal-backdrop {
   position: fixed;
   top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(5, 4, 8, 0.8);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -495,13 +632,16 @@ body {
 .modal-content {
   background: var(--card-bg);
   padding: 24px;
-  border-radius: 12px;
+  border-radius: 16px;
   width: 90%;
   max-width: 420px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  border: 1px solid var(--border-color);
 }
 
 .modal-title {
+  font-family: var(--font-display);
+  font-weight: 700;
   margin-bottom: 8px;
 }
 
@@ -514,8 +654,8 @@ body {
   width: 100%;
   padding: 12px;
   margin: 16px 0 24px 0;
-  border-radius: 8px;
-  background-color: #222222;
+  border-radius: 10px;
+  background-color: #221c2e;
   color: #ffffff;
   border: 1px solid var(--border-color);
   font-size: 0.95rem;
@@ -547,11 +687,12 @@ body {
 .corrupted-box {
   background: var(--card-bg);
   padding: 40px 32px;
-  border-radius: 12px;
+  border-radius: 16px;
   width: 100%;
   max-width: 460px;
   text-align: center;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  border-top: 3px solid var(--accent-pink);
 }
 
 .corrupted-icon {
@@ -560,6 +701,8 @@ body {
 }
 
 .corrupted-box h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
   margin-bottom: 12px;
 }
 
@@ -572,4 +715,25 @@ body {
 @keyframes fadeOut {
   from { opacity: 1; }
   to { opacity: 0; }
+}
+
+/* Responsive: la sidebar se convierte en barra superior en pantallas chicas */
+@media (max-width: 860px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+    flex-direction: column;
+  }
+
+  .main-container {
+    padding: 24px 20px 48px;
+  }
+
+  .search-hero {
+    padding: 24px 20px;
+  }
 }
