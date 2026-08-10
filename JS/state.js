@@ -6,5 +6,7 @@ export const state = {
   resultadosBusqueda: [],
   playlists: [],
   isLoading: false,
-  searchError: null
+  searchError: null,
+  // Orden elegido por el usuario para cada playlist (HU9). Clave: playlistId, valor: 'reciente' | 'antigua' | 'alfabetico'
+  ordenPorPlaylist: {}
 };

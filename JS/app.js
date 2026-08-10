@@ -1,18 +1,40 @@
 import { state } from './state.js';
 import { searchSongs } from './api.js';
-import { getPlaylists, savePlaylists, addSongToPlaylist } from './storage.js';
+import {
+  getPlaylists,
+  savePlaylists,
+  addSongToPlaylist,
+  removeSongFromPlaylist,
+  deletePlaylist,
+  hayDatosCorruptos,
+  reiniciarDatos
+} from './storage.js';
 import {
   showToast,
   renderSearchResults,
   renderPlaylistsList,
   showPlaylistSelectorModal,
-  renderPlaylistDetail
+  showConfirmModal,
+  renderPlaylistDetail,
+  renderDatosCorruptos
 } from './ui.js';
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Si los datos guardados están dañados, mostrar pantalla de recuperación (HU10)
+  if (hayDatosCorruptos()) {
+    renderDatosCorruptos(handleReiniciarDatos);
+    return;
+  }
+
   initEventListeners();
   renderApp();
 });
+
+// Borra los datos dañados y recarga la app desde cero (HU10)
+const handleReiniciarDatos = () => {
+  reiniciarDatos();
+  window.location.reload();
+};
 
 const initEventListeners = () => {
   // Manejo de la Búsqueda (HU1 y HU2)
@@ -41,7 +63,7 @@ const initEventListeners = () => {
   // Creación de Playlists con Validación (HU3)
   document.getElementById('btn-create-playlist').addEventListener('click', () => {
     const nombre = prompt('Ingresa el nombre para tu nueva playlist (ej. "Road trip"):');
-
+    
     // Validar nombre no vacío o con solo espacios (HU3)
     if (nombre !== null) {
       if (!nombre.trim()) {
@@ -51,21 +73,26 @@ const initEventListeners = () => {
 
       const playlists = getPlaylists();
       const nuevaPlaylist = {
-        id: Date.now().toString(),
+        id: crypto?.randomUUID?.() ?? Date.now().toString(),
         nombre: nombre.trim(),
         canciones: []
       };
-
+      
       playlists.push(nuevaPlaylist);
-      savePlaylists(playlists);
-      renderApp();
-      showToast(`✅ Playlist "${nuevaPlaylist.nombre}" creada con éxito`, 'success');
+      try {
+        savePlaylists(playlists);
+        renderApp();
+        showToast(`✅ Playlist "${nuevaPlaylist.nombre}" creada con éxito`, 'success');
+      } catch (error) {
+        console.error('Error creando playlist:', error);
+        showToast('❌ No se pudo crear la playlist. Intenta de nuevo.', 'error');
+      }
     }
   });
 };
 
 // Agregar canción a Playlist (HU4)
-export const handleAddSong = (cancion) => {
+const handleAddSong = (cancion) => {
   const playlists = getPlaylists();
 
   if (playlists.length === 0) {
@@ -99,24 +126,65 @@ const processAddResult = (result) => {
 };
 
 // Navegación a Detalle y Retorno (HU5)
-export const handleOpenPlaylist = (playlistId) => {
+const handleOpenPlaylist = (playlistId) => {
   state.playlistActivaId = playlistId;
   renderApp();
 };
 
-export const handleBackToSearch = () => {
+const handleBackToSearch = () => {
   state.playlistActivaId = null;
   renderApp();
 };
 
+// Quitar canción individual con confirmación previa (HU6)
+const handleRemoveSong = (playlistId, cancionId, cancionTitulo) => {
+  showConfirmModal(
+    `Vas a quitar "${cancionTitulo}" de esta playlist.`,
+    () => {
+      const result = removeSongFromPlaylist(playlistId, cancionId);
+      if (result.success) {
+        renderApp();
+        showToast(`🗑️ "${result.cancionTitulo}" quitada de "${result.playlistName}"`, 'success');
+      } else {
+        showToast('❌ No se pudo quitar la canción. Intenta de nuevo.', 'error');
+      }
+    }
+  );
+};
+
+// Eliminar playlist completa con confirmación previa (HU6)
+const handleDeletePlaylist = (playlistId, playlistNombre) => {
+  showConfirmModal(
+    `Vas a eliminar la playlist "${playlistNombre}" junto con todas sus canciones. Esta acción no se puede deshacer.`,
+    () => {
+      const result = deletePlaylist(playlistId);
+      if (result.success) {
+        if (state.playlistActivaId === playlistId) {
+          state.playlistActivaId = null;
+        }
+        renderApp();
+        showToast(`🗑️ Playlist "${result.playlistName}" eliminada`, 'success');
+      } else {
+        showToast('❌ No se pudo eliminar la playlist. Intenta de nuevo.', 'error');
+      }
+    }
+  );
+};
+
+// Cambiar el criterio de orden de una playlist puntual (HU9)
+const handleOrderChange = (playlistId, ordenSeleccionado) => {
+  state.ordenPorPlaylist[playlistId] = ordenSeleccionado;
+  renderApp();
+};
+
 // Orquestador Principal de Interfaz
-export const renderApp = () => {
+const renderApp = () => {
   const searchSection = document.getElementById('search-section');
   const detailSection = document.getElementById('detail-section');
   state.playlists = getPlaylists();
 
   // Actualizar la lista lateral de playlists
-  renderPlaylistsList(state.playlists, handleOpenPlaylist);
+  renderPlaylistsList(state.playlists, handleOpenPlaylist, handleDeletePlaylist);
 
   // Alternar entre Vista Búsqueda y Vista Detalle de Playlist (HU5)
   if (state.playlistActivaId) {
@@ -124,7 +192,15 @@ export const renderApp = () => {
     if (activePlaylist) {
       searchSection.style.display = 'none';
       detailSection.style.display = 'block';
-      renderPlaylistDetail(activePlaylist, detailSection, handleBackToSearch);
+      const ordenActual = state.ordenPorPlaylist[activePlaylist.id] || 'reciente';
+      renderPlaylistDetail(
+        activePlaylist,
+        detailSection,
+        handleBackToSearch,
+        handleRemoveSong,
+        ordenActual,
+        handleOrderChange
+      );
       return;
     }
   }

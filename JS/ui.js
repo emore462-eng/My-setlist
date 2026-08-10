@@ -30,6 +30,53 @@ const formatDate = (date) => {
   }).format(date);
 };
 
+// Suma la duración (en ms) de todas las canciones de una playlist (HU7)
+const calcularDuracionTotalMs = (canciones) =>
+  canciones.reduce((total, cancion) => total + (cancion.duracionMs || 0), 0);
+
+// Formatea milisegundos totales a un texto legible tipo "1 h 23 min" (HU7)
+const formatDuracionTotal = (totalMs) => {
+  const totalMinutos = Math.floor(totalMs / 60000);
+  const horas = Math.floor(totalMinutos / 60);
+  const minutos = totalMinutos % 60;
+
+  if (horas === 0) return `${minutos} min`;
+  return `${horas} h ${minutos} min`;
+};
+
+// Encuentra el valor más frecuente dentro de una lista de textos (HU8)
+const obtenerMasFrecuente = (valores) => {
+  if (valores.length === 0) return null;
+
+  const conteo = {};
+  valores.forEach((valor) => {
+    conteo[valor] = (conteo[valor] || 0) + 1;
+  });
+
+  return Object.entries(conteo).sort((a, b) => b[1] - a[1])[0][0];
+};
+
+// Calcula las estadísticas de una playlist: género y artista más frecuentes (HU8)
+const calcularEstadisticas = (canciones) => ({
+  generoTop: obtenerMasFrecuente(canciones.map((c) => c.genero || 'Desconocido')),
+  artistaTop: obtenerMasFrecuente(canciones.map((c) => c.artista))
+});
+
+// Devuelve una copia ordenada de las canciones según el criterio elegido (HU9)
+const ordenarCanciones = (canciones, orden) => {
+  const copia = [...canciones];
+
+  switch (orden) {
+    case 'antigua':
+      return copia.sort((a, b) => a.fechaAgregado - b.fechaAgregado);
+    case 'alfabetico':
+      return copia.sort((a, b) => a.titulo.localeCompare(b.titulo, 'es', { sensitivity: 'base' }));
+    case 'reciente':
+    default:
+      return copia.sort((a, b) => b.fechaAgregado - a.fechaAgregado);
+  }
+};
+
 // Renderizado de Resultados de Búsqueda y Estados de Carga/Error (HU1 y HU2)
 export const renderSearchResults = (songs, onAddClick, isLoading, errorMsg) => {
   const container = document.getElementById('search-results');
@@ -86,8 +133,8 @@ export const renderSearchResults = (songs, onAddClick, isLoading, errorMsg) => {
   });
 };
 
-// Renderizado de la lista lateral de Playlists (HU3)
-export const renderPlaylistsList = (playlists, onOpenClick) => {
+// Renderizado de la lista lateral de Playlists (HU3, HU6)
+export const renderPlaylistsList = (playlists, onOpenClick, onDeleteClick) => {
   const container = document.getElementById('playlists-list');
   container.innerHTML = '';
 
@@ -104,10 +151,20 @@ export const renderPlaylistsList = (playlists, onOpenClick) => {
         <h4 class="playlist-card-title">${playlist.nombre}</h4>
         <span class="playlist-card-count">${playlist.canciones.length} canción(es)</span>
       </div>
-      <span class="playlist-card-arrow">➔</span>
+      <div class="playlist-card-actions">
+        <button class="btn-icon btn-delete-playlist" title="Eliminar playlist" aria-label="Eliminar playlist">🗑️</button>
+        <span class="playlist-card-arrow">➔</span>
+      </div>
     `;
 
     item.addEventListener('click', () => onOpenClick(playlist.id));
+
+    const deleteBtn = item.querySelector('.btn-delete-playlist');
+    deleteBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      onDeleteClick(playlist.id, playlist.nombre);
+    });
+
     container.appendChild(item);
   });
 };
@@ -149,9 +206,65 @@ export const showPlaylistSelectorModal = (playlists, song, onSelect) => {
   };
 };
 
-// Detalle de Playlist y mensaje de Estado Vacío (HU5)
-export const renderPlaylistDetail = (playlist, container, onBack) => {
+// Modal de Confirmación genérico para acciones destructivas (HU6)
+export const showConfirmModal = (message, onConfirm) => {
+  const existingModal = document.getElementById('confirm-modal');
+  if (existingModal) existingModal.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'confirm-modal';
+  modal.className = 'modal-backdrop';
+
+  modal.innerHTML = `
+    <div class="modal-content">
+      <h3 class="modal-title">¿Estás seguro?</h3>
+      <p class="modal-text">${message}</p>
+      <div class="modal-actions">
+        <button id="confirm-cancel" class="btn btn-secondary">Cancelar</button>
+        <button id="confirm-accept" class="btn btn-danger">Sí, eliminar</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  document.getElementById('confirm-cancel').onclick = () => modal.remove();
+  document.getElementById('confirm-accept').onclick = () => {
+    modal.remove();
+    onConfirm();
+  };
+};
+
+// Pantalla de aviso cuando los datos guardados están dañados/corruptos (HU10)
+export const renderDatosCorruptos = (onReset) => {
+  const existingScreen = document.getElementById('corrupted-data-screen');
+  if (existingScreen) existingScreen.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'corrupted-data-screen';
+  overlay.className = 'corrupted-screen';
+
+  overlay.innerHTML = `
+    <div class="corrupted-box">
+      <div class="corrupted-icon">⚠️</div>
+      <h2>No pudimos leer tus playlists guardadas</h2>
+      <p>Los datos guardados en este navegador parecen estar dañados y no podemos mostrarlos de forma segura. Esto no afecta al resto de tu equipo ni a otras apps.</p>
+      <button id="btn-reset-data" class="btn btn-danger">Empezar de cero</button>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  document.getElementById('btn-reset-data').addEventListener('click', onReset);
+};
+
+// Detalle de Playlist y mensaje de Estado Vacío (HU5, HU6, HU7, HU8, HU9)
+export const renderPlaylistDetail = (playlist, container, onBack, onRemoveSong, ordenActual, onOrderChange) => {
   container.innerHTML = '';
+
+  const duracionTotalMs = calcularDuracionTotalMs(playlist.canciones);
+  const stats = calcularEstadisticas(playlist.canciones);
+  const sinDatos = 'Todavía no hay datos';
 
   const header = document.createElement('div');
   header.className = 'playlist-detail-header';
@@ -159,12 +272,31 @@ export const renderPlaylistDetail = (playlist, container, onBack) => {
     <button id="btn-back" class="btn btn-secondary">⬅ Volver al buscador</button>
     <div class="playlist-detail-info">
       <h2>${playlist.nombre}</h2>
-      <p class="playlist-meta">${playlist.canciones.length} canción(es) guardada(s)</p>
+      <p class="playlist-meta">${playlist.canciones.length} canción(es) guardada(s) • ⏱️ ${formatDuracionTotal(duracionTotalMs)}</p>
     </div>
   `;
 
   container.appendChild(header);
   document.getElementById('btn-back').addEventListener('click', onBack);
+
+  // Estadísticas de la playlist (HU8)
+  const statsBox = document.createElement('div');
+  statsBox.className = 'playlist-stats';
+  statsBox.innerHTML = `
+    <div class="stat-item">
+      <span class="stat-label">🎵 Canciones</span>
+      <span class="stat-value">${playlist.canciones.length}</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">🎧 Género más repetido</span>
+      <span class="stat-value">${stats.generoTop ?? sinDatos}</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">⭐ Artista más repetido</span>
+      <span class="stat-value">${stats.artistaTop ?? sinDatos}</span>
+    </div>
+  `;
+  container.appendChild(statsBox);
 
   // Mensaje amigable si no hay canciones (HU5)
   if (playlist.canciones.length === 0) {
@@ -181,8 +313,27 @@ export const renderPlaylistDetail = (playlist, container, onBack) => {
 
   const list = document.createElement('ul');
   list.className = 'song-detail-list';
-s
-  playlist.canciones.forEach((cancion) => {
+
+  // Selector de orden (HU9): el criterio elegido solo aplica a esta playlist
+  const sortBox = document.createElement('div');
+  sortBox.className = 'playlist-sort';
+  sortBox.innerHTML = `
+    <label for="sort-select" class="sort-label">Ordenar por:</label>
+    <select id="sort-select" class="sort-select">
+      <option value="reciente" ${ordenActual === 'reciente' ? 'selected' : ''}>Más reciente primero</option>
+      <option value="antigua" ${ordenActual === 'antigua' ? 'selected' : ''}>Más antigua primero</option>
+      <option value="alfabetico" ${ordenActual === 'alfabetico' ? 'selected' : ''}>Alfabético (A-Z)</option>
+    </select>
+  `;
+  container.appendChild(sortBox);
+
+  document.getElementById('sort-select').addEventListener('change', (e) => {
+    onOrderChange(playlist.id, e.target.value);
+  });
+
+  const cancionesOrdenadas = ordenarCanciones(playlist.canciones, ordenActual);
+
+  cancionesOrdenadas.forEach((cancion) => {
     const item = document.createElement('li');
     item.className = 'song-detail-item';
     item.innerHTML = `
@@ -192,7 +343,13 @@ s
         <span class="song-detail-artist">${cancion.artista} — <em>${cancion.album}</em></span>
       </div>
       <span class="song-detail-date">Agregada: ${formatDate(cancion.fechaAgregado)}</span>
+      <button class="btn-icon btn-remove-song" title="Quitar canción" aria-label="Quitar canción">🗑️</button>
     `;
+
+    item
+      .querySelector('.btn-remove-song')
+      .addEventListener('click', () => onRemoveSong(playlist.id, cancion.id, cancion.titulo));
+
     list.appendChild(item);
   });
 

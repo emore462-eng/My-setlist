@@ -1,14 +1,24 @@
 /**
- * Modelo de Dominio para una Canción (HU1, HU4, HU5)
+ * Modelo de Dominio para una Canción (HU1, HU4, HU5, HU8)
  */
 export class Cancion {
-  constructor({ id, titulo, artista, album, albumCover, duracionMs, fechaAgregado = new Date() }) {
+  constructor({
+    id,
+    titulo,
+    artista,
+    album,
+    albumCover,
+    duracionMs,
+    genero = 'Desconocido',
+    fechaAgregado = new Date()
+  }) {
     this.id = id;
     this.titulo = titulo;
     this.artista = artista;
     this.album = album;
     this.albumCover = albumCover;
     this.duracionMs = duracionMs || 0;
+    this.genero = genero || 'Desconocido';
     this.fechaAgregado = fechaAgregado instanceof Date ? fechaAgregado : new Date(fechaAgregado);
   }
 
