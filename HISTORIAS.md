@@ -1,4 +1,4 @@
-## Historias de Usuario — Mi Setlist
+# Historias de Usuario — Mi Setlist
 
 Este documento organiza el MVP de **Mi Setlist** en 11 historias de usuario, pensadas para una sola persona desarrollando en **2 sprints**, cada uno equivalente a **una sesión de trabajo**.
 
@@ -166,6 +166,37 @@ Cada historia sigue el formato: *Como... quiero... para...*, seguido de sus crit
 
 ---
 
+## 🟣 HUs propias (Iniciativa personal)
+
+**Contexto:** con el MVP completo (Sprint 1 + Sprint 2), se proponen 5 features pequeñas "de producción" que aportan valor real sin romper el contrato técnico (sin backend, sin librerías externas): favoritos, filtro interno de canciones, deshacer eliminación, exportar playlist y modo aleatorio. Se eligieron las siguientes 2 para redactarlas como HU con criterios de aceptación, y **ambas quedaron implementadas** el mismo día de su definición.
+
+### Historia 12 — Marcar canciones como favoritas ✅ Elegida e implementada
+
+**Como** persona que arma playlists grandes,
+**quiero** marcar ciertas canciones como favoritas dentro de una playlist,
+**para** encontrar rápido mis temas preferidos sin tener que revisar toda la lista.
+
+**Criterios de aceptación:**
+- Cada canción dentro de una playlist tiene una opción visible para marcarla o desmarcarla como favorita (ej. un ícono de estrella).
+- Las canciones favoritas se distinguen visualmente del resto (ej. estrella rellena vs. vacía).
+- Puedo activar un filtro que muestre solo las canciones favoritas de esa playlist.
+- Si cierro y vuelvo a abrir la app, mis favoritos siguen marcados como estaban.
+
+---
+
+### Historia 13 — Deshacer la última eliminación ✅ Elegida e implementada
+
+**Como** persona que puede cometer errores al usar la app,
+**quiero** poder deshacer la última canción o playlist que eliminé,
+**para** recuperarla si me arrepentí, sin tenerle tanto miedo a los botones de borrar.
+
+**Criterios de aceptación:**
+- Después de eliminar una canción o una playlist, aparece un aviso temporal (toast) con la opción "Deshacer".
+- Si toco "Deshacer" dentro de ese tiempo, la canción o playlist eliminada vuelve exactamente como estaba, en el mismo lugar.
+- Si dejo pasar el tiempo del aviso sin tocar "Deshacer", la eliminación queda confirmada y el aviso desaparece.
+- Solo puedo deshacer la última eliminación; una eliminación nueva reemplaza la posibilidad de deshacer la anterior.
+
+---
 
 ## 📌 Notas finales
 
@@ -302,4 +333,3 @@ Brinda mayor flexibilidad para organizar las playlists sin perder su contenido.
 El desarrollo de estos logros adicionales permitió definir una primera propuesta de interfaz, comprender la estructura de los datos que ofrecerá la API y generar posibles mejoras para futuras versiones de la aplicación.
 
 Si bien estas funcionalidades no forman parte del MVP actual, representan una base importante para continuar evolucionando Mi Setlist mediante nuevas historias de usuario y futuras iteraciones del proyecto.
-

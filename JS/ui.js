@@ -20,6 +20,46 @@ export const showToast = (message, type = 'info') => {
   }, 2500);
 };
 
+// Notificación con opción de "Deshacer" la última eliminación (HU13)
+export const showUndoToast = (message, onUndo, durationMs = 5000) => {
+  let container = document.getElementById('toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toast-container';
+    container.className = 'toast-container';
+    document.body.appendChild(container);
+  }
+
+  // Si ya había un aviso de "deshacer" pendiente, se reemplaza:
+  // solo se puede deshacer la última eliminación (criterio de HU13)
+  const previous = document.getElementById('undo-toast');
+  if (previous) {
+    clearTimeout(previous._timeoutId);
+    previous.remove();
+  }
+
+  const toast = document.createElement('div');
+  toast.id = 'undo-toast';
+  toast.className = 'toast toast-undo';
+  toast.innerHTML = `
+    <span>${message}</span>
+    <button class="btn-undo">Deshacer</button>
+  `;
+
+  container.appendChild(toast);
+
+  toast._timeoutId = setTimeout(() => {
+    toast.classList.add('fade-out');
+    toast.addEventListener('animationend', () => toast.remove());
+  }, durationMs);
+
+  toast.querySelector('.btn-undo').addEventListener('click', () => {
+    clearTimeout(toast._timeoutId);
+    toast.remove();
+    onUndo();
+  });
+};
+
 // Formateador helper para fechas (HU5)
 const formatDate = (date) => {
   if (!(date instanceof Date) || isNaN(date.getTime())) return 'Fecha desconocida';
@@ -258,8 +298,18 @@ export const renderDatosCorruptos = (onReset) => {
   document.getElementById('btn-reset-data').addEventListener('click', onReset);
 };
 
-// Detalle de Playlist y mensaje de Estado Vacío (HU5, HU6, HU7, HU8, HU9)
-export const renderPlaylistDetail = (playlist, container, onBack, onRemoveSong, ordenActual, onOrderChange) => {
+// Detalle de Playlist y mensaje de Estado Vacío (HU5, HU6, HU7, HU8, HU9, HU12)
+export const renderPlaylistDetail = (
+  playlist,
+  container,
+  onBack,
+  onRemoveSong,
+  ordenActual,
+  onOrderChange,
+  filtroFavoritosActivo,
+  onToggleFiltroFavoritos,
+  onToggleFavorito
+) => {
   container.innerHTML = '';
 
   const duracionTotalMs = calcularDuracionTotalMs(playlist.canciones);
@@ -314,26 +364,52 @@ export const renderPlaylistDetail = (playlist, container, onBack, onRemoveSong, 
   const list = document.createElement('ul');
   list.className = 'song-detail-list';
 
-  // Selector de orden (HU9): el criterio elegido solo aplica a esta playlist
-  const sortBox = document.createElement('div');
-  sortBox.className = 'playlist-sort';
-  sortBox.innerHTML = `
-    <label for="sort-select" class="sort-label">Ordenar por:</label>
-    <select id="sort-select" class="sort-select">
-      <option value="reciente" ${ordenActual === 'reciente' ? 'selected' : ''}>Más reciente primero</option>
-      <option value="antigua" ${ordenActual === 'antigua' ? 'selected' : ''}>Más antigua primero</option>
-      <option value="alfabetico" ${ordenActual === 'alfabetico' ? 'selected' : ''}>Alfabético (A-Z)</option>
-    </select>
+  // Barra de herramientas: orden (HU9) + filtro de favoritas (HU12). Solo aplica a esta playlist.
+  const toolbar = document.createElement('div');
+  toolbar.className = 'playlist-toolbar';
+  toolbar.innerHTML = `
+    <div class="playlist-sort">
+      <label for="sort-select" class="sort-label">Ordenar por:</label>
+      <select id="sort-select" class="sort-select">
+        <option value="reciente" ${ordenActual === 'reciente' ? 'selected' : ''}>Más reciente primero</option>
+        <option value="antigua" ${ordenActual === 'antigua' ? 'selected' : ''}>Más antigua primero</option>
+        <option value="alfabetico" ${ordenActual === 'alfabetico' ? 'selected' : ''}>Alfabético (A-Z)</option>
+      </select>
+    </div>
+    <label class="filter-favoritos">
+      <input type="checkbox" id="filtro-favoritos" ${filtroFavoritosActivo ? 'checked' : ''} />
+      Solo favoritas ⭐
+    </label>
   `;
-  container.appendChild(sortBox);
+  container.appendChild(toolbar);
 
   document.getElementById('sort-select').addEventListener('change', (e) => {
     onOrderChange(playlist.id, e.target.value);
   });
 
-  const cancionesOrdenadas = ordenarCanciones(playlist.canciones, ordenActual);
+  document.getElementById('filtro-favoritos').addEventListener('change', () => {
+    onToggleFiltroFavoritos(playlist.id);
+  });
 
-  cancionesOrdenadas.forEach((cancion) => {
+  const cancionesOrdenadas = ordenarCanciones(playlist.canciones, ordenActual);
+  const cancionesVisibles = filtroFavoritosActivo
+    ? cancionesOrdenadas.filter((c) => c.favorito)
+    : cancionesOrdenadas;
+
+  // Estado vacío del filtro: hay canciones, pero ninguna es favorita (HU12)
+  if (cancionesVisibles.length === 0) {
+    const emptyFilter = document.createElement('div');
+    emptyFilter.className = 'empty-state empty-state-inline';
+    emptyFilter.innerHTML = `
+      <div class="empty-icon">⭐</div>
+      <h3>Todavía no marcaste favoritas</h3>
+      <p>Tocá la estrella de una canción para verla acá.</p>
+    `;
+    container.appendChild(emptyFilter);
+    return;
+  }
+
+  cancionesVisibles.forEach((cancion) => {
     const item = document.createElement('li');
     item.className = 'song-detail-item';
     item.innerHTML = `
@@ -343,8 +419,13 @@ export const renderPlaylistDetail = (playlist, container, onBack, onRemoveSong, 
         <span class="song-detail-artist">${cancion.artista} — <em>${cancion.album}</em></span>
       </div>
       <span class="song-detail-date">Agregada: ${formatDate(cancion.fechaAgregado)}</span>
+      <button class="btn-icon btn-favorito ${cancion.favorito ? 'is-favorito' : ''}" title="${cancion.favorito ? 'Quitar de favoritas' : 'Marcar como favorita'}" aria-label="Marcar como favorita">${cancion.favorito ? '⭐' : '☆'}</button>
       <button class="btn-icon btn-remove-song" title="Quitar canción" aria-label="Quitar canción">🗑️</button>
     `;
+
+    item
+      .querySelector('.btn-favorito')
+      .addEventListener('click', () => onToggleFavorito(playlist.id, cancion.id));
 
     item
       .querySelector('.btn-remove-song')

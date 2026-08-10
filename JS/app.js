@@ -5,12 +5,16 @@ import {
   savePlaylists,
   addSongToPlaylist,
   removeSongFromPlaylist,
+  insertarCancionEnPlaylist,
   deletePlaylist,
+  restaurarPlaylist,
+  toggleFavorito,
   hayDatosCorruptos,
   reiniciarDatos
 } from './storage.js';
 import {
   showToast,
+  showUndoToast,
   renderSearchResults,
   renderPlaylistsList,
   showPlaylistSelectorModal,
@@ -136,7 +140,7 @@ const handleBackToSearch = () => {
   renderApp();
 };
 
-// Quitar canción individual con confirmación previa (HU6)
+// Quitar canción individual con confirmación previa, ofreciendo deshacer (HU6, HU13)
 const handleRemoveSong = (playlistId, cancionId, cancionTitulo) => {
   showConfirmModal(
     `Vas a quitar "${cancionTitulo}" de esta playlist.`,
@@ -144,7 +148,15 @@ const handleRemoveSong = (playlistId, cancionId, cancionTitulo) => {
       const result = removeSongFromPlaylist(playlistId, cancionId);
       if (result.success) {
         renderApp();
-        showToast(`🗑️ "${result.cancionTitulo}" quitada de "${result.playlistName}"`, 'success');
+        showUndoToast(`🗑️ "${result.cancionTitulo}" quitada de "${result.playlistName}"`, () => {
+          const restauracion = insertarCancionEnPlaylist(playlistId, result.cancion, result.indice);
+          if (restauracion.success) {
+            renderApp();
+            showToast(`↩️ "${result.cancionTitulo}" restaurada`, 'success');
+          } else {
+            showToast('❌ No se pudo restaurar la canción.', 'error');
+          }
+        });
       } else {
         showToast('❌ No se pudo quitar la canción. Intenta de nuevo.', 'error');
       }
@@ -152,10 +164,10 @@ const handleRemoveSong = (playlistId, cancionId, cancionTitulo) => {
   );
 };
 
-// Eliminar playlist completa con confirmación previa (HU6)
+// Eliminar playlist completa con confirmación previa, ofreciendo deshacer (HU6, HU13)
 const handleDeletePlaylist = (playlistId, playlistNombre) => {
   showConfirmModal(
-    `Vas a eliminar la playlist "${playlistNombre}" junto con todas sus canciones. Esta acción no se puede deshacer.`,
+    `Vas a eliminar la playlist "${playlistNombre}" junto con todas sus canciones.`,
     () => {
       const result = deletePlaylist(playlistId);
       if (result.success) {
@@ -163,12 +175,36 @@ const handleDeletePlaylist = (playlistId, playlistNombre) => {
           state.playlistActivaId = null;
         }
         renderApp();
-        showToast(`🗑️ Playlist "${result.playlistName}" eliminada`, 'success');
+        showUndoToast(`🗑️ Playlist "${result.playlistName}" eliminada`, () => {
+          const restauracion = restaurarPlaylist(result.playlist, result.indice);
+          if (restauracion.success) {
+            renderApp();
+            showToast(`↩️ Playlist "${result.playlistName}" restaurada`, 'success');
+          } else {
+            showToast('❌ No se pudo restaurar la playlist.', 'error');
+          }
+        });
       } else {
         showToast('❌ No se pudo eliminar la playlist. Intenta de nuevo.', 'error');
       }
     }
   );
+};
+
+// Marcar/desmarcar una canción como favorita (HU12)
+const handleToggleFavorito = (playlistId, cancionId) => {
+  const result = toggleFavorito(playlistId, cancionId);
+  if (result.success) {
+    renderApp();
+  } else {
+    showToast('❌ No se pudo actualizar la favorita. Intenta de nuevo.', 'error');
+  }
+};
+
+// Activar/desactivar el filtro "solo favoritas" de una playlist puntual (HU12)
+const handleToggleFiltroFavoritos = (playlistId) => {
+  state.filtroFavoritosPorPlaylist[playlistId] = !state.filtroFavoritosPorPlaylist[playlistId];
+  renderApp();
 };
 
 // Cambiar el criterio de orden de una playlist puntual (HU9)
@@ -193,13 +229,17 @@ const renderApp = () => {
       searchSection.style.display = 'none';
       detailSection.style.display = 'block';
       const ordenActual = state.ordenPorPlaylist[activePlaylist.id] || 'reciente';
+      const filtroFavoritosActivo = state.filtroFavoritosPorPlaylist[activePlaylist.id] || false;
       renderPlaylistDetail(
         activePlaylist,
         detailSection,
         handleBackToSearch,
         handleRemoveSong,
         ordenActual,
-        handleOrderChange
+        handleOrderChange,
+        filtroFavoritosActivo,
+        handleToggleFiltroFavoritos,
+        handleToggleFavorito
       );
       return;
     }

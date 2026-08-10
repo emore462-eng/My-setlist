@@ -110,7 +110,8 @@ export const addSongToPlaylist = (playlistId, cancionData) => {
 };
 
 /**
- * Quita una canción de una playlist de forma inmutable (HU6)
+ * Quita una canción de una playlist de forma inmutable (HU6).
+ * Devuelve la canción y su posición original para poder deshacer la acción (HU13).
  */
 export const removeSongFromPlaylist = (playlistId, cancionId) => {
   const playlists = getPlaylists();
@@ -120,7 +121,8 @@ export const removeSongFromPlaylist = (playlistId, cancionId) => {
     return { success: false, reason: 'NOT_FOUND' };
   }
 
-  const cancion = playlist.canciones.find((c) => c.id === cancionId);
+  const indice = playlist.canciones.findIndex((c) => c.id === cancionId);
+  const cancion = playlist.canciones[indice];
 
   const playlistsActualizadas = playlists.map((p) =>
     p.id === playlistId
@@ -130,7 +132,13 @@ export const removeSongFromPlaylist = (playlistId, cancionId) => {
 
   try {
     savePlaylists(playlistsActualizadas);
-    return { success: true, playlistName: playlist.nombre, cancionTitulo: cancion?.titulo };
+    return {
+      success: true,
+      playlistName: playlist.nombre,
+      cancionTitulo: cancion?.titulo,
+      cancion,
+      indice
+    };
   } catch (error) {
     console.error('Error al quitar la canción de la playlist:', error);
     return { success: false, reason: 'SAVE_FAILED', playlistName: playlist.nombre };
@@ -138,9 +146,83 @@ export const removeSongFromPlaylist = (playlistId, cancionId) => {
 };
 
 /**
- * Elimina una playlist completa de forma inmutable (HU6)
+ * Reinserta una canción en una playlist en la posición indicada, para deshacer HU6 (HU13)
+ */
+export const insertarCancionEnPlaylist = (playlistId, cancion, indice) => {
+  const playlists = getPlaylists();
+  const playlist = playlists.find((p) => p.id === playlistId);
+
+  if (!playlist || !cancion) {
+    return { success: false, reason: 'NOT_FOUND' };
+  }
+
+  const cancionesActualizadas = [...playlist.canciones];
+  const posicion = Math.min(Math.max(indice ?? cancionesActualizadas.length, 0), cancionesActualizadas.length);
+  cancionesActualizadas.splice(posicion, 0, new Cancion(cancion));
+
+  const playlistsActualizadas = playlists.map((p) =>
+    p.id === playlistId ? { ...p, canciones: cancionesActualizadas } : p
+  );
+
+  try {
+    savePlaylists(playlistsActualizadas);
+    return { success: true, playlistName: playlist.nombre };
+  } catch (error) {
+    console.error('Error al restaurar la canción:', error);
+    return { success: false, reason: 'SAVE_FAILED' };
+  }
+};
+
+/**
+ * Elimina una playlist completa de forma inmutable (HU6).
+ * Devuelve la playlist y su posición original para poder deshacer la acción (HU13).
  */
 export const deletePlaylist = (playlistId) => {
+  const playlists = getPlaylists();
+  const indice = playlists.findIndex((p) => p.id === playlistId);
+
+  if (indice === -1) {
+    return { success: false, reason: 'NOT_FOUND' };
+  }
+
+  const playlist = playlists[indice];
+  const playlistsActualizadas = playlists.filter((p) => p.id !== playlistId);
+
+  try {
+    savePlaylists(playlistsActualizadas);
+    return { success: true, playlistName: playlist.nombre, playlist, indice };
+  } catch (error) {
+    console.error('Error al eliminar la playlist:', error);
+    return { success: false, reason: 'SAVE_FAILED', playlistName: playlist.nombre };
+  }
+};
+
+/**
+ * Reinserta una playlist completa en la posición indicada, para deshacer HU6 (HU13)
+ */
+export const restaurarPlaylist = (playlist, indice) => {
+  if (!playlist) {
+    return { success: false, reason: 'NOT_FOUND' };
+  }
+
+  const playlists = getPlaylists();
+  const playlistsActualizadas = [...playlists];
+  const posicion = Math.min(Math.max(indice ?? playlistsActualizadas.length, 0), playlistsActualizadas.length);
+  playlistsActualizadas.splice(posicion, 0, playlist);
+
+  try {
+    savePlaylists(playlistsActualizadas);
+    return { success: true, playlistName: playlist.nombre };
+  } catch (error) {
+    console.error('Error al restaurar la playlist:', error);
+    return { success: false, reason: 'SAVE_FAILED' };
+  }
+};
+
+/**
+ * Marca o desmarca una canción como favorita dentro de una playlist, de forma inmutable (HU12)
+ */
+export const toggleFavorito = (playlistId, cancionId) => {
   const playlists = getPlaylists();
   const playlist = playlists.find((p) => p.id === playlistId);
 
@@ -148,13 +230,22 @@ export const deletePlaylist = (playlistId) => {
     return { success: false, reason: 'NOT_FOUND' };
   }
 
-  const playlistsActualizadas = playlists.filter((p) => p.id !== playlistId);
+  const playlistsActualizadas = playlists.map((p) =>
+    p.id === playlistId
+      ? {
+          ...p,
+          canciones: p.canciones.map((c) =>
+            c.id === cancionId ? new Cancion({ ...c, favorito: !c.favorito }) : c
+          )
+        }
+      : p
+  );
 
   try {
     savePlaylists(playlistsActualizadas);
-    return { success: true, playlistName: playlist.nombre };
+    return { success: true };
   } catch (error) {
-    console.error('Error al eliminar la playlist:', error);
-    return { success: false, reason: 'SAVE_FAILED', playlistName: playlist.nombre };
+    console.error('Error al actualizar la canción favorita:', error);
+    return { success: false, reason: 'SAVE_FAILED' };
   }
 };
