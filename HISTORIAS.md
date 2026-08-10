@@ -1,4 +1,4 @@
-# Historias de Usuario — Mi Setlist
+## Historias de Usuario — Mi Setlist
 
 Este documento organiza el MVP de **Mi Setlist** en 11 historias de usuario, pensadas para una sola persona desarrollando en **2 sprints**, cada uno equivalente a **una sesión de trabajo**.
 
@@ -173,3 +173,133 @@ Cada historia sigue el formato: *Como... quiero... para...*, seguido de sus crit
 - El Sprint 1 deja una app **usable de punta a punta** (buscar → crear playlist → agregar → ver contenido).
 - El Sprint 2 la convierte en una app **completa y confiable** (gestión, estadísticas, orden y persistencia a prueba de errores).
 - Cualquier código generado con ayuda de IA para implementar estas historias debe registrarse en `PROMPTS.md`, según las reglas del proyecto.
+
+### Trazabilidad de los Sprints
+
+La siguiente matriz muestra cómo se distribuyen las funcionalidades del MVP entre los dos sprints del proyecto. Cada funcionalidad tiene una única historia de usuario responsable, evitando duplicidades y asegurando que todo el alcance del MVP esté cubierto.
+
+| Funcionalidad del MVP                   | Historia de Usuario                                            |  Sprint  | Entregable esperado                                                                                               |
+| --------------------------------------- | -------------------------------------------------------------- | :------: | ----------------------------------------------------------------------------------------------------------------- |
+| Buscar canciones por artista o título   | HU1 – Buscar canciones                                         | Sprint 1 | El usuario puede realizar búsquedas y visualizar resultados.                                                      |
+| Mostrar estados de la búsqueda          | HU2 – Saber qué está pasando durante la búsqueda               | Sprint 1 | La aplicación informa cuando está cargando, cuando no encuentra resultados o cuando ocurre un error.              |
+| Crear playlists                         | HU3 – Crear una playlist                                       | Sprint 1 | El usuario puede crear una o varias playlists con un nombre personalizado.                                        |
+| Agregar canciones a una playlist        | HU4 – Agregar canciones a una playlist                         | Sprint 1 | El usuario puede incorporar canciones a cualquiera de sus playlists.                                              |
+| Visualizar el contenido de una playlist | HU5 – Ver el contenido de una playlist                         | Sprint 1 | El usuario puede consultar todas las canciones almacenadas en una playlist.                                       |
+| Eliminar canciones y playlists          | HU6 – Quitar canciones y eliminar playlists con confirmación   | Sprint 2 | El usuario puede eliminar elementos de forma segura mediante una confirmación previa.                             |
+| Visualizar la duración total            | HU7 – Ver la duración total de una playlist                    | Sprint 2 | La aplicación calcula y muestra la duración acumulada de cada playlist.                                           |
+| Consultar estadísticas                  | HU8 – Ver estadísticas de una playlist                         | Sprint 2 | El usuario visualiza información resumida de su playlist (cantidad de canciones, artista y género predominantes). |
+| Ordenar canciones                       | HU9 – Ordenar las canciones de una playlist                    | Sprint 2 | El usuario puede reorganizar la lista utilizando distintos criterios de ordenamiento.                             |
+| Persistencia de datos                   | HU10 – Conservar las playlists después de cerrar la aplicación | Sprint 2 | Las playlists permanecen disponibles después de cerrar o recargar la aplicación.                                  |
+| Recuperación ante datos corruptos       | HU11 – Recuperarse de datos dañados                            | Sprint 2 | La aplicación detecta datos inválidos y permite reiniciar el almacenamiento de forma segura.                      |
+
+
+
+## 🟢 Bosquejo de la interfaz (Wireframe)
+Antes de comenzar la implementación, se realizó un boceto de la interfaz principal con el objetivo de definir la ubicación de cada componente y facilitar el diseño de la experiencia del usuario.
+
+## Wireframe en ASCII
++--------------------------------------------------------------------+
+|                         🎵 Mi Setlist                              |
++--------------------------------------------------------------------+
+
+ Buscar canción o artista
++--------------------------------------------+ [ Buscar ]
+| Soda Stereo                                |
++--------------------------------------------+
+
+Resultados de búsqueda
+
++---------------------------------------------------------------+
+| 🎵 De Música Ligera          Soda Stereo      [ Agregar ]      |
+| 🎵 Persiana Americana        Soda Stereo      [ Agregar ]      |
+| 🎵 Cuando Pase el Temblor    Soda Stereo      [ Agregar ]      |
++---------------------------------------------------------------+
+
+=================================================================
+
+Mis Playlists
+
++-----------------------+
+| 🎼 Road Trip          |
+| 🎼 Ensayo             |
+| 🎼 Favoritas          |
++-----------------------+
+
+-----------------------------------------------------------------
+
+Playlist seleccionada: Road Trip
+
+Duración: 1 h 24 min
+
+Canciones
+
+-----------------------------------------------------------------
+| 🎵 De Música Ligera      Soda Stereo      04/08/2026           |
+| 🎵 Trátame Suavemente    Soda Stereo      04/08/2026           |
+| 🎵 En la Ciudad de la Furia  Soda Stereo  04/08/2026           |
+-----------------------------------------------------------------
+
+Ordenar por:
+[ Fecha ] [ Nombre ]
+
+Estadísticas
+
+• Canciones: 15
+• Artista más frecuente: Soda Stereo
+• Género predominante: Rock
+
+[ Eliminar Playlist ]
+
+### Análisis del diseño
+
+Después de elaborar el wireframe se identificaron las siguientes decisiones de diseño:
+
+- La **barra de búsqueda** se ubica en la parte superior porque representa la primera acción que realizará el usuario al ingresar a la aplicación.
+- Debajo de la búsqueda aparecen los **resultados**, permitiendo agregar canciones directamente a una playlist sin cambiar de pantalla.
+- Las **playlists** se muestran en una sección independiente para facilitar la selección y navegación entre ellas.
+- La zona principal de la interfaz presenta el contenido de la playlist seleccionada junto con su duración, opciones de ordenamiento y estadísticas.
+- Las acciones de eliminación se colocan al final para disminuir el riesgo de borrar información accidentalmente.
+
+El flujo que propone este diseño es el siguiente:
+
+Buscar canciones → Agregar a una playlist → Visualizar el contenido → Administrar la playlist
+
+Este flujo coincide con las historias de usuario definidas para el Sprint 1 y Sprint 2.
+
+
+## 🔴 Ideas de Funcionalidades Futuras
+
+Aunque el MVP ya cubre todas las funcionalidades solicitadas, se plantean algunas mejoras que podrían incorporarse en versiones posteriores de la aplicación.
+
+Estas ideas servirán como base para futuras historias de usuario.
+
+## Idea 1 – Marcar canciones como favoritas
+
+Permitir que el usuario marque determinadas canciones como favoritas para acceder rápidamente a ellas o generar automáticamente una playlist de favoritos.
+
+### Beneficio
+
+Facilita encontrar la música que el usuario escucha con mayor frecuencia.
+
+## Idea 2 – Filtrar canciones dentro de una playlist
+
+Permitir filtrar las canciones por nombre, artista o género dentro de una playlist.
+
+### Beneficio
+
+Mejora la navegación cuando la playlist contiene una gran cantidad de canciones.
+
+## Idea 3 – Editar el nombre de una playlist
+
+Permitir modificar el nombre de una playlist ya creada sin necesidad de eliminarla y crear una nueva.
+
+### Beneficio
+
+Brinda mayor flexibilidad para organizar las playlists sin perder su contenido.
+
+## Conclusiones
+
+El desarrollo de estos logros adicionales permitió definir una primera propuesta de interfaz, comprender la estructura de los datos que ofrecerá la API y generar posibles mejoras para futuras versiones de la aplicación.
+
+Si bien estas funcionalidades no forman parte del MVP actual, representan una base importante para continuar evolucionando Mi Setlist mediante nuevas historias de usuario y futuras iteraciones del proyecto.
+

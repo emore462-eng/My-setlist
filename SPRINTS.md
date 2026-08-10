@@ -4,7 +4,7 @@ Distribución de las 11 historias de usuario en 2 sesiones de clase, pensada par
 
 ---
 
-## Sprint 1 (Clase 18) — Meta: al terminar, puedo buscar canciones reales, crear una playlist y ver las canciones que le agregué.
+##  Sprint 1 (Clase 18) — Meta: al terminar, puedo buscar canciones reales, crear una playlist y ver las canciones que le agregué.
 
 - **HU1 — Buscar canciones**: va primero porque sin esto no hay nada que agregar a ninguna playlist. Es la puerta de entrada de todo el proyecto.
 - **HU2 — Saber qué está pasando durante la búsqueda**: va justo después porque es un complemento directo de la búsqueda. No tiene sentido construirla por separado; se hace al mismo tiempo que HU1, pero se cuenta como el segundo paso porque primero necesitas que la búsqueda funcione para luego cubrir sus casos (cargando, error, sin resultados).

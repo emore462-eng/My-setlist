@@ -1,16 +1,59 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Setlist</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mi Setlist - Gestor de Playlists</title>
+  <link rel="stylesheet" href="./CSS/styles.css" />
 </head>
 
 <body>
-    <h1>🎵 Mi Setlist</h1>
-<p id="app"></p>
-<script type="module" src="js/app.js"></script>
-</body>
+  <header class="app-header">
+    <div class="header-container">
+      <h1>🎵 Mi Setlist</h1>
+    </div>
+  </header>
 
+  <main class="main-container">
+    <!-- Vista Principal: Buscador y Lista de Playlists -->
+    <section id="search-section" class="view-section">
+      <div class="search-box">
+        <form id="search-form">
+          <input 
+            type="text" 
+            id="search-input" 
+            placeholder="Buscar canción, artista o álbum..." 
+            required 
+            autocomplete="off"
+          />
+          <button type="submit" class="btn btn-primary">Buscar</button>
+        </form>
+      </div>
+
+      <div class="content-layout">
+        <!-- Columna de Resultados de Búsqueda -->
+        <article class="results-column">
+          <h2 class="section-title">Resultados de Búsqueda</h2>
+          <div id="search-results" class="results-grid">
+            <p class="text-muted">Ingresa el nombre de un artista o canción para comenzar la búsqueda.</p>
+          </div>
+        </article>
+
+        <!-- Columna Lateral de Playlists -->
+        <aside class="playlists-column">
+          <div class="sidebar-header">
+            <h2 class="section-title">Mis Playlists</h2>
+            <button id="btn-create-playlist" class="btn btn-secondary">+ Nueva</button>
+          </div>
+          <div id="playlists-list" class="playlists-list"></div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- Vista de Detalle de Playlist (HU5) -->
+    <section id="detail-section" class="view-section" style="display: none;"></section>
+  </main>
+
+  <script type="module" src="./JS/app.js"></script>
+</body>
 </html>

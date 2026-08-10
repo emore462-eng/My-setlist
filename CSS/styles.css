@@ -1,0 +1,392 @@
+:root {
+  --primary-color: #1db954;
+  --primary-hover: #1ed760;
+  --bg-color: #121212;
+  --card-bg: #181818;
+  --card-hover: #282828;
+  --text-main: #ffffff;
+  --text-muted: #b3b3b3;
+  --border-color: #333333;
+  --error-color: #e53935;
+  --warning-color: #f57c00;
+  --font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  font-family: var(--font-family);
+  line-height: 1.5;
+  padding-bottom: 40px;
+}
+
+.app-header {
+  background-color: #000000;
+  padding: 20px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.header-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.main-container {
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 0 20px;
+}
+
+/* Botones */
+.btn {
+  padding: 10px 18px;
+  border-radius: 20px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: #000000;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+  transform: scale(1.02);
+}
+
+.btn-secondary {
+  background-color: #333333;
+  color: #ffffff;
+}
+
+.btn-secondary:hover {
+  background-color: #444444;
+}
+
+/* Buscador */
+.search-box {
+  margin-bottom: 30px;
+}
+
+#search-form {
+  display: flex;
+  gap: 12px;
+  max-width: 600px;
+}
+
+#search-input {
+  flex: 1;
+  padding: 12px 18px;
+  border-radius: 20px;
+  border: 1px solid var(--border-color);
+  background-color: var(--card-bg);
+  color: var(--text-main);
+  font-size: 1rem;
+}
+
+#search-input:focus {
+  outline: 2px solid var(--primary-color);
+}
+
+/* Grid layout */
+.content-layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 30px;
+}
+
+@media (max-width: 768px) {
+  .content-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.section-title {
+  font-size: 1.3rem;
+  margin-bottom: 16px;
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+/* Tarjetas de resultados de búsqueda (HU1) */
+.results-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.song-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background-color: var(--card-bg);
+  padding: 12px 16px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.song-card:hover {
+  background-color: var(--card-hover);
+}
+
+.song-card-img {
+  width: 56px;
+  height: 56px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.song-card-info {
+  flex: 1;
+}
+
+.song-title {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.song-meta {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.song-duration {
+  background-color: #2a2a2a;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  color: #cccccc;
+}
+
+/* Avisos de estado (HU2) */
+.status-box {
+  padding: 20px;
+  border-radius: 8px;
+  background-color: var(--card-bg);
+  text-align: center;
+  margin-top: 10px;
+}
+
+.status-box.loading {
+  color: var(--primary-color);
+}
+
+.status-box.empty {
+  color: var(--text-muted);
+}
+
+.status-box.error {
+  color: var(--error-color);
+  border: 1px solid var(--error-color);
+}
+
+/* Columna Lateral de Playlists (HU3) */
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.playlists-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.playlist-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--card-bg);
+  padding: 14px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.playlist-card:hover {
+  background-color: var(--card-hover);
+}
+
+.playlist-card-title {
+  font-weight: 600;
+}
+
+.playlist-card-count {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  display: block;
+}
+
+/* Detalle de Playlist (HU5) */
+.playlist-detail-header {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.playlist-detail-info h2 {
+  font-size: 2rem;
+  margin-top: 8px;
+}
+
+.playlist-meta {
+  color: var(--text-muted);
+}
+
+.song-detail-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.song-detail-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background-color: var(--card-bg);
+  padding: 12px 16px;
+  border-radius: 8px;
+}
+
+.song-detail-cover {
+  width: 48px;
+  height: 48px;
+  border-radius: 4px;
+}
+
+.song-detail-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.song-detail-title {
+  font-weight: 600;
+}
+
+.song-detail-artist {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.song-detail-date {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* Estado Vacío (HU5) */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  background-color: var(--card-bg);
+  border-radius: 12px;
+  margin-top: 20px;
+}
+
+.empty-icon {
+  font-size: 3.5rem;
+  margin-bottom: 12px;
+}
+
+/* Toast Notifications (HU4) */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.toast {
+  padding: 12px 20px;
+  border-radius: 8px;
+  color: #ffffff;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  animation: slideIn 0.3s ease-out;
+}
+
+.toast-success { background-color: #2e7d32; }
+.toast-warning { background-color: #ed6c02; }
+.toast-error { background-color: #d32f2f; }
+.toast-info { background-color: #0288d1; }
+
+.toast.fade-out {
+  animation: fadeOut 0.3s ease-in forwards;
+}
+
+/* Modal Selector de Playlist (HU4) */
+.modal-backdrop {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1500;
+}
+
+.modal-content {
+  background: var(--card-bg);
+  padding: 24px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 420px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+}
+
+.modal-title {
+  margin-bottom: 8px;
+}
+
+.modal-text {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.modal-select {
+  width: 100%;
+  padding: 12px;
+  margin: 16px 0 24px 0;
+  border-radius: 8px;
+  background-color: #222222;
+  color: #ffffff;
+  border: 1px solid var(--border-color);
+  font-size: 0.95rem;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+@keyframes slideIn {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
