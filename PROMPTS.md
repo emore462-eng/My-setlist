@@ -128,3 +128,71 @@ Campos útiles: trackName, artistName, artworkUrl100, trackTimeMillis, primaryGe
 
 Y así hice sucesivamente con las demas historias 
 
+## [09-08-2026] — Historia 12: Marcar canciones como favoritas
+
+**Para qué:** implementar la Historia 12, una de las 2 HUs propias definidas en la Parte 4 (features de producción sin backend ni librerías).
+
+**Prompt:**
+Mi app hace: Mi Setlist es una app de música vanilla JS donde busco canciones
+reales con la API de iTunes, las agrego a playlists propias con nombre,
+puedo ver el contenido de cada playlist (carátula, artista, fecha agregada),
+quitar canciones o eliminar playlists con confirmación propia, ver su
+duración total y estadísticas (género/artista más repetido), ordenarlas
+por fecha o alfabéticamente, y todo persiste en localStorage —
+recuperándose de forma amigable si los datos guardados se dañan.
+
+Propón 5 features pequeñas "de producción" que aporten valor real al
+usuario, factibles con mi contrato (sin backend ni librerías). Una línea
+cada una.
+
+[La IA propuso 5 features: favoritos, filtro interno, deshacer eliminación,
+exportar playlist y modo aleatorio. Elegí Favoritos y Deshacer eliminación,
+las redactamos como HU con criterios de aceptación siguiendo el mismo
+formato de HISTORIAS.md, y luego pedí implementar ambas: "las 2 historias
+que me señalas está bien, implementalas ambas"]
+
+MODO: Antes de escribir código, hazme las preguntas estratégicas necesarias
+sobre decisiones que me corresponden a mí (experiencia de usuario,
+casos borde, estructura de datos). Espera mis respuestas. Después
+dame el código en porciones pequeñas, explicando qué hace cada una
+y en qué archivo va.
+
+RESTRICCIONES: Respeta el contrato técnico que te compartí. No reescribas archivos que no
+te pedí. Si el contrato te impide algo, dímelo en vez de saltártelo. No supongas nada.
+
+**Resultado:**
+Agregué la Historia 12 a `HISTORIAS.md` con sus 4 criterios de aceptación. Para implementarla toqué 5 archivos:
+- `models/Cancion.js`: nuevo campo `favorito` (default `false`) en el constructor.
+- `storage.js`: `toggleFavorito(playlistId, cancionId)`, inmutable — reconstruye la canción con `new Cancion({...c, favorito: !c.favorito})` (respeta `.map`/spread) y la guarda en `localStorage`, por lo que el favorito persiste al recargar.
+- `state.js`: `filtroFavoritosPorPlaylist: {}`, un mapa `{ playlistId: boolean }` para que el filtro de una playlist no afecte a las demás (mismo criterio que el orden de HU9: vive solo en memoria, no se persiste).
+- `ui.js`: dentro de `renderPlaylistDetail`, agregué el botón ⭐/☆ por canción y el checkbox "Solo favoritas ⭐" en la barra de herramientas; el filtrado se hace con `.filter((c) => c.favorito)` sobre la lista ya ordenada, con un estado vacío propio ("Todavía no marcaste favoritas") si el filtro no encuentra nada.
+- `app.js`: `handleToggleFavorito()` y `handleToggleFiltroFavoritos()`, ambos disparando `renderApp()` para reflejar el cambio al instante.
+Probé con Node que el toggle es inmutable, que el filtro funciona, y que las canciones actualizadas siguen siendo instancias de `Cancion` (conservan `duracionFormateada` y demás getters).
+
+---
+
+## [09-08-2026] — Historia 13: Deshacer la última eliminación
+
+**Para qué:** implementar la Historia 13, la segunda de las 2 HUs propias definidas en la Parte 4.
+
+**Prompt:**
+[Mismo prompt de la Parte 4 que dio origen a la Historia 12: propuesta de 5 features,
+elección de "Favoritos" y "Deshacer eliminación", redacción como HU con criterios,
+y pedido de implementar ambas]
+
+MODO: Antes de escribir código, hazme las preguntas estratégicas necesarias
+sobre decisiones que me corresponden a mí (experiencia de usuario,
+casos borde, estructura de datos). Espera mis respuestas. Después
+dame el código en porciones pequeñas, explicando qué hace cada una
+y en qué archivo va.
+
+RESTRICCIONES: Respeta el contrato técnico que te compartí. No reescribas archivos que no
+te pedí. Si el contrato te impide algo, dímelo en vez de saltártelo. No supongas nada.
+
+**Resultado:**
+Agregué la Historia 13 a `HISTORIAS.md` con sus 4 criterios de aceptación. Para implementarla toqué 4 archivos:
+- `storage.js`: extendí `removeSongFromPlaylist()` y `deletePlaylist()` (ya existían de HU6) para que además devuelvan el `indice` (posición original) y el objeto completo eliminado. Agregué `insertarCancionEnPlaylist(playlistId, cancion, indice)` y `restaurarPlaylist(playlist, indice)`, que reinsertan el elemento borrado exactamente en su posición original con `.splice()` sobre una copia, sin mutar el arreglo original.
+- `ui.js`: `showUndoToast(message, onUndo, durationMs = 5000)`, una variante de `showToast()` con botón "Deshacer" y temporizador. Antes de mostrar un aviso nuevo, cancela el temporizador y elimina cualquier aviso de deshacer pendiente, así solo se puede deshacer la última eliminación.
+- `app.js`: modifiqué `handleRemoveSong` y `handleDeletePlaylist` (de HU6) para usar `showUndoToast()` en vez de `showToast()` simple, con un callback que restaura vía `insertarCancionEnPlaylist()` o `restaurarPlaylist()`. Saqué del modal de confirmación la frase "Esta acción no se puede deshacer", porque dejó de ser cierta.
+- `CSS/styles.css`: estilos `.toast-undo` y `.btn-undo` para diferenciar este aviso de los toasts normales.
+Probé con Node que la canción vuelve exactamente a su posición original al deshacer, y que un segundo aviso de "deshacer" reemplaza y cancela el anterior (no se pueden acumular deshacer de varias eliminaciones).
